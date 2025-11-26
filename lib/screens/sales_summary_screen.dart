@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/product_provider.dart';
+import '../providers/transaction_provider.dart';
 
 class SalesData {
   final String productName;
-  final int quantity;
-  final double revenue;
+  int quantity;
+  double revenue;
 
   SalesData({
     required this.productName,
@@ -30,26 +31,39 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
   @override
   void initState() {
     super.initState();
-    _generateMockSalesData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSalesData();
+    });
   }
 
-  void _generateMockSalesData() {
-    // Mock sales data for demonstration
-    final productProvider = Provider.of<ProductProvider>(context, listen: false);
-    final products = productProvider.products;
+  void _loadSalesData() {
+    final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
+    final transactions = transactionProvider.transactions;
 
-    _salesData = products.map((product) {
-      final quantity = (product.stock * 0.1).round(); // Simulate 10% of stock sold
-      final revenue = quantity * product.price;
-      return SalesData(
-        productName: product.name,
-        quantity: quantity,
-        revenue: revenue,
-      );
-    }).toList();
+    // Calculate sales data from actual transactions
+    final productSales = <String, SalesData>{};
 
-    _totalRevenue = _salesData.fold(0, (sum, item) => sum + item.revenue);
-    _totalTransactions = (_totalRevenue / 50000).round(); // Estimate transactions
+    for (final transaction in transactions) {
+      for (final item in transaction.items) {
+        final productName = item.product.name;
+        if (productSales.containsKey(productName)) {
+          productSales[productName]!.quantity += item.quantity;
+          productSales[productName]!.revenue += item.totalPrice;
+        } else {
+          productSales[productName] = SalesData(
+            productName: productName,
+            quantity: item.quantity,
+            revenue: item.totalPrice,
+          );
+        }
+      }
+    }
+
+    _salesData = productSales.values.toList();
+    _salesData.sort((a, b) => b.revenue.compareTo(a.revenue)); // Sort by revenue descending
+
+    _totalRevenue = transactionProvider.getTotalRevenue();
+    _totalTransactions = transactionProvider.getTransactionCount();
   }
 
   @override
@@ -58,6 +72,26 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
       appBar: AppBar(
         title: const Text('Sales Summary'),
         backgroundColor: Colors.purple.shade800,
+        elevation: 0,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+            tooltip: 'Menu',
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.date_range),
+            onPressed: () {},
+            tooltip: 'Date Range',
+          ),
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () {},
+            tooltip: 'Share Report',
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
