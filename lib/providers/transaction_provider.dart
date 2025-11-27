@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import '../models/transaction.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/transaction.dart' as tx;
 import '../models/cart_item.dart';
 
 class TransactionProvider with ChangeNotifier {
-  List<Transaction> _transactions = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<tx.Transaction> _transactions = [];
   bool _isLoading = false;
 
-  List<Transaction> get transactions => _transactions;
+  List<tx.Transaction> get transactions => _transactions;
   bool get isLoading => _isLoading;
 
   Future<void> loadTransactions() async {
@@ -16,15 +16,8 @@ class TransactionProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final transactionsJson = prefs.getStringList('transactions') ?? [];
-
-      _transactions = transactionsJson
-          .map((json) => Transaction.fromJson(jsonDecode(json)))
-          .toList();
-
-      // Sort by date (newest first)
-      _transactions.sort((a, b) => b.date.compareTo(a.date));
+      final snapshot = await _firestore.collection('transactions').orderBy('date', descending: true).get();
+      _transactions = snapshot.docs.map((doc) => tx.Transaction.fromJson(doc.data())).toList();
     } catch (e) {
       debugPrint('Error loading transactions: $e');
     } finally {
@@ -33,25 +26,17 @@ class TransactionProvider with ChangeNotifier {
     }
   }
 
-  Future<void> addTransaction(Transaction transaction) async {
-    _transactions.insert(0, transaction); // Add to beginning for newest first
-
+  Future<void> addTransaction(tx.Transaction transaction) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final transactionsJson = _transactions
-          .map((t) => jsonEncode(t.toJson()))
-          .toList();
-
-      await prefs.setStringList('transactions', transactionsJson);
+      await _firestore.collection('transactions').add(transaction.toJson());
+      _transactions.insert(0, transaction); // Add to beginning for newest first
       notifyListeners();
     } catch (e) {
       debugPrint('Error saving transaction: $e');
-      // Remove from list if save failed
-      _transactions.removeAt(0);
     }
   }
 
-  Future<Transaction> createTransactionFromCart({
+  Future<tx.Transaction> createTransactionFromCart({
     required List<CartItem> items,
     required double subtotal,
     required double discountAmount,
@@ -59,7 +44,7 @@ class TransactionProvider with ChangeNotifier {
     required String paymentMethod,
     String? customerName,
   }) async {
-    final transaction = Transaction(
+    final transaction = tx.Transaction(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       date: DateTime.now(),
       items: List.from(items), // Create a copy
@@ -74,7 +59,7 @@ class TransactionProvider with ChangeNotifier {
     return transaction;
   }
 
-  List<Transaction> getTransactionsByDateRange(DateTime start, DateTime end) {
+  List<tx.Transaction> getTransactionsByDateRange(DateTime start, DateTime end) {
     return _transactions.where((transaction) {
       return transaction.date.isAfter(start.subtract(const Duration(days: 1))) &&
              transaction.date.isBefore(end.add(const Duration(days: 1)));
@@ -113,11 +98,14 @@ class TransactionProvider with ChangeNotifier {
   }
 
   Future<void> clearAllTransactions() async {
-    _transactions.clear();
-
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('transactions');
+      final batch = _firestore.batch();
+      final snapshot = await _firestore.collection('transactions').get();
+      for (final doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+      _transactions.clear();
       notifyListeners();
     } catch (e) {
       debugPrint('Error clearing transactions: $e');

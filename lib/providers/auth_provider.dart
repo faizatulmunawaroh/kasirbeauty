@@ -1,37 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthProvider with ChangeNotifier {
-  bool _isAuthenticated = false;
-  String? _username;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  User? _user;
   bool _isLoading = false;
 
-  bool get isAuthenticated => _isAuthenticated;
-  String? get username => _username;
+  bool get isAuthenticated => _user != null;
+  String? get email => _user?.email;
+  User? get user => _user;
   bool get isLoading => _isLoading;
 
-  Future<void> login(String username, String password) async {
+  AuthProvider() {
+    _auth.authStateChanges().listen((User? user) {
+      _user = user;
+      notifyListeners();
+    });
+  }
+
+  Future<void> login(String email, String password) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      // For demo purposes, accept any username/password combination
-      // In a real app, this would make an API call
-      await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
-
-      if (username == 'admin' && password == 'admin') {
-        _isAuthenticated = true;
-        _username = username;
-
-        // Save to local storage
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('isAuthenticated', true);
-        await prefs.setString('username', username);
-
-        notifyListeners();
-      } else {
-        throw Exception('Invalid credentials');
-      }
+      await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
     } catch (e) {
       _isLoading = false;
       notifyListeners();
@@ -43,44 +38,21 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> logout() async {
-    _isAuthenticated = false;
-    _username = null;
-
-    // Clear from local storage
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('isAuthenticated');
-    await prefs.remove('username');
-
-    notifyListeners();
+    await _auth.signOut();
   }
 
-  Future<void> checkAuthStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    _isAuthenticated = prefs.getBool('isAuthenticated') ?? false;
-    _username = prefs.getString('username');
-    notifyListeners();
-  }
-
-  Future<void> register(String username, String password, String name) async {
+  Future<void> register(String email, String password, String name) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      // For demo purposes, simulate registration
-      await Future.delayed(const Duration(seconds: 1));
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      if (username.isNotEmpty && password.isNotEmpty && name.isNotEmpty) {
-        _isAuthenticated = true;
-        _username = username;
-
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('isAuthenticated', true);
-        await prefs.setString('username', username);
-
-        notifyListeners();
-      } else {
-        throw Exception('Invalid registration data');
-      }
+      // Update display name
+      await userCredential.user?.updateDisplayName(name);
     } catch (e) {
       _isLoading = false;
       notifyListeners();

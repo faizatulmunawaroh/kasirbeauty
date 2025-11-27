@@ -67,7 +67,7 @@ class ProfessionalDrawer extends StatelessWidget {
 
                   // User Info
                   Text(
-                    authProvider.username ?? 'Beauty Manager',
+                    authProvider.user?.displayName ?? authProvider.email ?? 'Beauty Manager',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
