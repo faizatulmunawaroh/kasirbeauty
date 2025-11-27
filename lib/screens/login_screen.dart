@@ -83,11 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.blue.shade50, Colors.white],
-          ),
+          color: Colors.white,
         ),
         child: SafeArea(
           child: Center(
@@ -108,13 +104,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade100,
+                          color: Colors.pink.shade100,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.point_of_sale,
                           size: 40,
-                          color: Colors.blue.shade800,
+                          color: Colors.pink.shade800,
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -124,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         _isLogin ? 'Welcome Back' : 'Create Account',
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade800,
+                          color: Colors.pink.shade800,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -186,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _submit,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue.shade800,
+                            backgroundColor: Colors.pink.shade800,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -215,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           _isLogin
                               ? 'Don\'t have an account? Sign Up'
                               : 'Already have an account? Sign In',
-                          style: TextStyle(color: Colors.blue.shade800),
+                          style: TextStyle(color: Colors.pink.shade800),
                         ),
                       ),
                     ],

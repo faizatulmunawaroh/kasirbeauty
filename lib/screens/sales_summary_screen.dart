@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../providers/product_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../providers/transaction_provider.dart';
 
 class SalesData {
@@ -27,6 +27,8 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
   List<SalesData> _salesData = [];
   double _totalRevenue = 0;
   int _totalTransactions = 0;
+  DateTime? startDate;
+  DateTime? endDate;
 
   @override
   void initState() {
@@ -36,9 +38,11 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
     });
   }
 
-  void _loadSalesData() {
+  void _loadSalesData([DateTime? start, DateTime? end]) {
     final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
-    final transactions = transactionProvider.transactions;
+    final transactions = start != null && end != null
+        ? transactionProvider.getTransactionsByDateRange(start, end)
+        : transactionProvider.transactions;
 
     // Calculate sales data from actual transactions
     final productSales = <String, SalesData>{};
@@ -62,16 +66,109 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
     _salesData = productSales.values.toList();
     _salesData.sort((a, b) => b.revenue.compareTo(a.revenue)); // Sort by revenue descending
 
-    _totalRevenue = transactionProvider.getTotalRevenue();
-    _totalTransactions = transactionProvider.getTransactionCount();
+    _totalRevenue = transactionProvider.getTotalRevenue(start, end);
+    _totalTransactions = transactionProvider.getTransactionCount(start, end);
+  }
+
+  void _showDateRangeDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Select Date Range'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: startDate ?? DateTime.now(),
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now(),
+                        );
+                        if (date != null) {
+                          setState(() => startDate = date);
+                        }
+                      },
+                      child: Text(startDate != null ? DateFormat('yyyy-MM-dd').format(startDate!) : 'Start Date'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: endDate ?? DateTime.now(),
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now(),
+                        );
+                        if (date != null) {
+                          setState(() => endDate = date);
+                        }
+                      },
+                      child: Text(endDate != null ? DateFormat('yyyy-MM-dd').format(endDate!) : 'End Date'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  startDate = null;
+                  endDate = null;
+                });
+                _loadSalesData();
+                Navigator.pop(context);
+              },
+              child: const Text('Clear'),
+            ),
+            TextButton(
+              onPressed: () {
+                _loadSalesData(startDate, endDate);
+                Navigator.pop(context);
+              },
+              child: const Text('Apply'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _shareReport() {
+    final report = '''
+Sales Report - ${DateFormat('EEEE, dd MMMM yyyy').format(DateTime.now())}
+
+Date Range: ${startDate != null && endDate != null ? '${DateFormat('yyyy-MM-dd').format(startDate!)} to ${DateFormat('yyyy-MM-dd').format(endDate!)}' : 'All Time'}
+
+Total Revenue: Rp ${NumberFormat('#,###').format(_totalRevenue)}
+Total Transactions: $_totalTransactions
+
+Product Performance:
+${_salesData.map((data) => '${data.productName}: ${data.quantity} units - Rp ${NumberFormat('#,###').format(data.revenue)}').join('\n')}
+
+Top Performer: ${_salesData.isNotEmpty ? _salesData.first.productName : 'N/A'}
+Average Transaction: Rp ${NumberFormat('#,###').format(_totalTransactions > 0 ? _totalRevenue / _totalTransactions : 0)}
+Total Products Sold: ${_salesData.fold(0, (sum, item) => sum + item.quantity)} units
+''';
+    Share.share(report, subject: 'Sales Summary Report');
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
         title: const Text('Sales Summary'),
-        backgroundColor: Colors.purple.shade800,
+        backgroundColor: Colors.pink.shade50,
         elevation: 0,
         leading: Builder(
           builder: (context) => IconButton(
@@ -83,26 +180,27 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.date_range),
-            onPressed: () {},
+            onPressed: _showDateRangeDialog,
             tooltip: 'Date Range',
           ),
           IconButton(
             icon: const Icon(Icons.share),
-            onPressed: () {},
+            onPressed: _shareReport,
             tooltip: 'Share Report',
           ),
         ],
       ),
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.purple.shade50, Colors.white],
-          ),
+          color: Colors.white,
         ),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.only(
+            left: 16,
+            top: 16,
+            right: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -114,7 +212,7 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
                       'Total Revenue',
                       'Rp ${NumberFormat('#,###').format(_totalRevenue)}',
                       Icons.attach_money,
-                      Colors.green,
+                      Colors.pink.shade600,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -123,7 +221,7 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
                       'Transactions',
                       _totalTransactions.toString(),
                       Icons.receipt,
-                      Colors.blue,
+                      Colors.pink.shade500,
                     ),
                   ),
                 ],
@@ -166,11 +264,11 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
                     ),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: Colors.purple.shade100,
+                        backgroundColor: Colors.pink.shade100,
                         child: Text(
                           '${index + 1}',
                           style: TextStyle(
-                            color: Colors.purple.shade800,
+                            color: Colors.pink.shade800,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -208,7 +306,7 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.insights, color: Colors.purple.shade700),
+                          Icon(Icons.insights, color: Colors.pink.shade700),
                           const SizedBox(width: 8),
                           const Text(
                             'Performance Insights',
@@ -223,17 +321,17 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
                       _buildInsightItem(
                         'Top Performer',
                         _salesData.isNotEmpty ? _salesData.first.productName : 'N/A',
-                        Colors.green,
+                        Colors.pink.shade600,
                       ),
                       _buildInsightItem(
                         'Average Transaction',
                         'Rp ${NumberFormat('#,###').format(_totalTransactions > 0 ? _totalRevenue / _totalTransactions : 0)}',
-                        Colors.blue,
+                        Colors.pink.shade500,
                       ),
                       _buildInsightItem(
                         'Total Products Sold',
                         '${_salesData.fold(0, (sum, item) => sum + item.quantity)} units',
-                        Colors.orange,
+                        Colors.pink.shade400,
                       ),
                     ],
                   ),
@@ -243,6 +341,7 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 

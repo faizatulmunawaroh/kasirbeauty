@@ -4,7 +4,6 @@ import 'providers/product_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/transaction_provider.dart';
 import 'screens/splash_screen.dart';
-import 'screens/dashboard_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,6 +22,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Beauty POS - Women\'s Products',
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,

@@ -13,7 +13,7 @@ class DashboardScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
-        backgroundColor: Colors.pink.shade800,
+        backgroundColor: Colors.pink.shade50,
         elevation: 0,
         leading: Builder(
           builder: (context) => IconButton(
@@ -32,18 +32,7 @@ class DashboardScreen extends StatelessWidget {
       ),
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.blue.shade900,
-              Colors.blue.shade800,
-              Colors.blue.shade600,
-              Colors.blue.shade400,
-              Colors.white,
-            ],
-            stops: const [0.0, 0.3, 0.6, 0.8, 1.0],
-          ),
+          color: Colors.white,
         ),
         child: SafeArea(
           child: Column(
@@ -56,11 +45,11 @@ class DashboardScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.pink.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.pink.withValues(alpha: 0.1),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -68,7 +57,7 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       child: Icon(
                         Icons.store,
-                        color: Colors.white,
+                        color: Colors.pink.shade600,
                         size: 32,
                       ),
                     ),
@@ -82,21 +71,14 @@ class DashboardScreen extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black.withOpacity(0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(1, 2),
-                                ),
-                              ],
+                              color: Colors.pink.shade800,
                             ),
                           ),
                           Text(
                             'Women\'s Beauty & Fashion POS',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.pink.shade600,
                             ),
                           ),
                         ],
@@ -105,12 +87,12 @@ class DashboardScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.pink.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.notifications_none,
-                        color: Colors.white,
+                        color: Colors.pink.shade600,
                         size: 24,
                       ),
                     ),
@@ -129,7 +111,7 @@ class DashboardScreen extends StatelessWidget {
                         'Today\'s Sales',
                         'Rp 2.5M',
                         Icons.trending_up,
-                        Colors.green,
+                        Colors.pink.shade600,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -138,7 +120,7 @@ class DashboardScreen extends StatelessWidget {
                         'Transactions',
                         '24',
                         Icons.receipt,
-                        Colors.blue,
+                        Colors.pink.shade500,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -147,7 +129,7 @@ class DashboardScreen extends StatelessWidget {
                         'Products',
                         '156',
                         Icons.inventory,
-                        Colors.orange,
+                        Colors.pink.shade400,
                       ),
                     ),
                   ],
@@ -163,7 +145,7 @@ class DashboardScreen extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.apps,
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.pink.shade600,
                       size: 20,
                     ),
                     const SizedBox(width: 8),
@@ -172,7 +154,7 @@ class DashboardScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Colors.pink.shade800,
                       ),
                     ),
                   ],
@@ -185,7 +167,7 @@ class DashboardScreen extends StatelessWidget {
               Expanded(
                 child: GridView.count(
                   crossAxisCount: 2,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10),
                   mainAxisSpacing: 16,
                   crossAxisSpacing: 16,
                   children: [
@@ -193,7 +175,7 @@ class DashboardScreen extends StatelessWidget {
                       context,
                       'Products',
                       Icons.inventory_2,
-                      Colors.green.shade600,
+                      Colors.pink.shade300,
                       () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const ProductListScreen()),
@@ -203,7 +185,7 @@ class DashboardScreen extends StatelessWidget {
                       context,
                       'Cashier',
                       Icons.point_of_sale,
-                      Colors.orange.shade600,
+                      Colors.pink.shade400,
                       () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const PosScreen()),
@@ -213,7 +195,7 @@ class DashboardScreen extends StatelessWidget {
                       context,
                       'Sales Summary',
                       Icons.analytics,
-                      Colors.purple.shade600,
+                      Colors.pink.shade500,
                       () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const SalesSummaryScreen()),
@@ -223,7 +205,7 @@ class DashboardScreen extends StatelessWidget {
                       context,
                       'Transaction History',
                       Icons.history,
-                      Colors.teal.shade600,
+                      Colors.pink.shade600,
                       () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const TransactionHistoryScreen()),
@@ -233,7 +215,7 @@ class DashboardScreen extends StatelessWidget {
                       context,
                       'AI Recommendations',
                       Icons.smart_toy,
-                      Colors.pink.shade600,
+                      Colors.pink.shade700,
                       () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const AiRecommendationScreen()),
@@ -253,15 +235,15 @@ class DashboardScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.2),
+          color: color.withValues(alpha: 0.2),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -272,23 +254,23 @@ class DashboardScreen extends StatelessWidget {
         children: [
           Icon(
             icon,
-            color: Colors.white,
+            color: color,
             size: 24,
           ),
           const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: color,
             ),
           ),
           Text(
             title,
             style: TextStyle(
               fontSize: 10,
-              color: Colors.white.withOpacity(0.8),
+              color: color.withValues(alpha: 0.8),
             ),
             textAlign: TextAlign.center,
           ),
@@ -387,23 +369,16 @@ class DashboardScreen extends StatelessWidget {
                             child: Icon(
                               icon,
                               size: 32,
-                              color: Colors.white,
+                              color: Colors.pink.shade600,
                             ),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black26,
-                                  blurRadius: 4,
-                                  offset: Offset(1, 1),
-                                ),
-                              ],
+                              color: Colors.pink.shade800,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -412,7 +387,7 @@ class DashboardScreen extends StatelessWidget {
                             width: 40,
                             height: 2,
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.7),
+                              color: Colors.pink.shade400,
                               borderRadius: BorderRadius.circular(1),
                             ),
                           ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import '../providers/transaction_provider.dart';
-import '../models/transaction.dart';
 
 class AnalyticsDashboard extends StatefulWidget {
   const AnalyticsDashboard({super.key});
@@ -39,6 +39,40 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
     super.dispose();
   }
 
+  void _exportReport() {
+    final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
+    final transactions = transactionProvider.transactions;
+
+    final totalRevenue = transactionProvider.getTotalRevenue();
+    final totalTransactions = transactionProvider.getTransactionCount();
+    final averageTransaction = totalTransactions > 0 ? totalRevenue / totalTransactions : 0.0;
+    final revenueByMethod = transactionProvider.getRevenueByPaymentMethod();
+
+    final weekAgo = DateTime.now().subtract(const Duration(days: 7));
+    final recentTransactions = transactions.where((t) => t.date.isAfter(weekAgo)).toList();
+    final weeklyRevenue = recentTransactions.fold(0.0, (sum, t) => sum + t.totalAmount);
+
+    final report = '''
+Analytics Report - ${DateFormat('EEEE, dd MMMM yyyy').format(DateTime.now())}
+
+Key Metrics:
+- Total Revenue: Rp ${NumberFormat('#,###').format(totalRevenue)}
+- Total Transactions: $totalTransactions
+- Average Transaction: Rp ${NumberFormat('#,###').format(averageTransaction)}
+- Weekly Revenue: Rp ${NumberFormat('#,###').format(weeklyRevenue)}
+
+Revenue by Payment Method:
+${revenueByMethod.entries.map((e) => '- ${e.key}: Rp ${NumberFormat('#,###').format(e.value)}').join('\n')}
+
+Recent Performance:
+- Today: Rp ${NumberFormat('#,###').format(_calculateDailyRevenue(DateTime.now()))}
+- Yesterday: Rp ${NumberFormat('#,###').format(_calculateDailyRevenue(DateTime.now().subtract(const Duration(days: 1))))}
+- This Week: Rp ${NumberFormat('#,###').format(weeklyRevenue)}
+- This Month: Rp ${NumberFormat('#,###').format(_calculateMonthlyRevenue())}
+''';
+    Share.share(report, subject: 'Analytics Report');
+  }
+
   @override
   Widget build(BuildContext context) {
     final transactionProvider = Provider.of<TransactionProvider>(context);
@@ -60,7 +94,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Analytics Dashboard'),
-        backgroundColor: Colors.purple.shade800,
+        backgroundColor: Colors.pink.shade50,
         elevation: 0,
         leading: Builder(
           builder: (context) => IconButton(
@@ -77,22 +111,14 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
           ),
           IconButton(
             icon: const Icon(Icons.download),
-            onPressed: () {},
+            onPressed: _exportReport,
             tooltip: 'Export Report',
           ),
         ],
       ),
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.purple.shade50,
-              Colors.white,
-              Colors.grey.shade50,
-            ],
-          ),
+          color: Colors.white,
         ),
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -110,27 +136,24 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.purple.shade600,
-                          Colors.purple.shade800,
-                        ],
-                      ),
+                      color: Colors.pink.shade50,
                       borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.pink.shade200,
+                        width: 1,
+                      ),
                     ),
                     child: Row(
                       children: [
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.analytics,
-                            color: Colors.white,
+                            color: Colors.pink.shade600,
                             size: 32,
                           ),
                         ),
@@ -139,18 +162,18 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'Business Analytics',
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  color: Colors.pink.shade800,
                                 ),
                               ),
                               Text(
                                 'Advanced insights & performance metrics',
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.8),
+                                  color: Colors.pink.shade600,
                                   fontSize: 14,
                                 ),
                               ),
@@ -172,7 +195,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
                         'Total Revenue',
                         'Rp ${NumberFormat('#,###').format(totalRevenue)}',
                         Icons.attach_money,
-                        Colors.green,
+                        Colors.pink.shade800,
                         '+12.5%',
                       ),
                     ),
@@ -182,7 +205,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
                         'Transactions',
                         totalTransactions.toString(),
                         Icons.receipt,
-                        Colors.blue,
+                        Colors.pink.shade700,
                         '+8.2%',
                       ),
                     ),
@@ -198,7 +221,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
                         'Avg Transaction',
                         'Rp ${NumberFormat('#,###').format(averageTransaction)}',
                         Icons.trending_up,
-                        Colors.orange,
+                        Colors.pink.shade600,
                         '+5.7%',
                       ),
                     ),
@@ -208,7 +231,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
                         'Weekly Revenue',
                         'Rp ${NumberFormat('#,###').format(weeklyRevenue)}',
                         Icons.calendar_view_week,
-                        Colors.purple,
+                        Colors.pink.shade500,
                         '+15.3%',
                       ),
                     ),
@@ -315,28 +338,28 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
                           'Today',
                           _calculateDailyRevenue(DateTime.now()),
                           Icons.today,
-                          Colors.blue,
+                          Colors.pink.shade400,
                         ),
                         const Divider(),
                         _buildPerformanceItem(
                           'Yesterday',
                           _calculateDailyRevenue(DateTime.now().subtract(const Duration(days: 1))),
                           Icons.calendar_today,
-                          Colors.green,
+                          Colors.pink.shade300,
                         ),
                         const Divider(),
                         _buildPerformanceItem(
                           'This Week',
                           weeklyRevenue,
                           Icons.date_range,
-                          Colors.purple,
+                          Colors.pink.shade500,
                         ),
                         const Divider(),
                         _buildPerformanceItem(
                           'This Month',
                           _calculateMonthlyRevenue(),
                           Icons.calendar_month,
-                          Colors.orange,
+                          Colors.pink.shade600,
                         ),
                       ],
                     ),
@@ -365,11 +388,11 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
-                        _buildTopProductItem('Lipstick Ruby Red', 45, Colors.pink),
+                        _buildTopProductItem('Lipstick Ruby Red', 45, Colors.pink.shade300),
                         const SizedBox(height: 12),
-                        _buildTopProductItem('Foundation Natural Beige', 32, Colors.teal),
+                        _buildTopProductItem('Foundation Natural Beige', 32, Colors.pink.shade400),
                         const SizedBox(height: 12),
-                        _buildTopProductItem('Mascara Volume Plus', 28, Colors.purple),
+                        _buildTopProductItem('Mascara Volume Plus', 28, Colors.pink.shade500),
                       ],
                     ),
                   ),
@@ -397,7 +420,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              color.withOpacity(0.8),
+              color.withValues(alpha: 0.8),
               color,
             ],
           ),
@@ -412,7 +435,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -424,7 +447,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -452,7 +475,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
               title,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -468,7 +491,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -523,7 +546,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -542,11 +565,11 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
   Color _getPaymentMethodColor(String method) {
     switch (method.toLowerCase()) {
       case 'cash':
-        return Colors.green;
+        return Colors.pink.shade600;
       case 'card':
-        return Colors.blue;
+        return Colors.pink.shade500;
       case 'qr':
-        return Colors.purple;
+        return Colors.pink.shade400;
       default:
         return Colors.grey;
     }

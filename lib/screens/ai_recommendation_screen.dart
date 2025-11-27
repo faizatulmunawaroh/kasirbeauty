@@ -494,7 +494,7 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('AI Beauty Recommendations'),
-        backgroundColor: Colors.pink.shade800,
+        backgroundColor: Colors.pink.shade50,
         elevation: 0,
         leading: Builder(
           builder: (context) => IconButton(
@@ -513,15 +513,7 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen>
       ),
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.pink.shade50,
-              Colors.white,
-              Colors.grey.shade50,
-            ],
-          ),
+          color: Colors.white,
         ),
         child: _isLoading
             ? const Center(
@@ -562,18 +554,15 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen>
                             Container(
                               padding: const EdgeInsets.all(24),
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Colors.pink.shade600,
-                                    Colors.pink.shade800,
-                                  ],
-                                ),
+                                color: Colors.pink.shade50,
                                 borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.pink.shade200,
+                                  width: 1,
+                                ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.pink.shade200.withOpacity(0.5),
+                                    color: Colors.pink.shade100.withOpacity(0.5),
                                     blurRadius: 15,
                                     offset: const Offset(0, 8),
                                   ),
@@ -592,9 +581,9 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen>
                                             color: Colors.white.withValues(alpha: 0.2),
                                             shape: BoxShape.circle,
                                           ),
-                                          child: const Icon(
+                                          child: Icon(
                                             Icons.smart_toy,
-                                            color: Colors.white,
+                                            color: Colors.pink.shade600,
                                             size: 32,
                                           ),
                                         ),
@@ -606,10 +595,10 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen>
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Text(
+                                        Text(
                                           'AI Beauty Assistant',
                                           style: TextStyle(
-                                            color: Colors.white,
+                                            color: Colors.pink.shade800,
                                             fontSize: 24,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -618,7 +607,7 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen>
                                         Text(
                                           'Personalized recommendations just for you',
                                           style: TextStyle(
-                                            color: Colors.white.withOpacity(0.9),
+                                            color: Colors.pink.shade600,
                                             fontSize: 14,
                                           ),
                                         ),
@@ -634,14 +623,14 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen>
                                             children: [
                                               Icon(
                                                 Icons.trending_up,
-                                                color: Colors.white,
+                                                color: Colors.pink.shade600,
                                                 size: 16,
                                               ),
                                               const SizedBox(width: 6),
                                               Text(
                                                 '${_recommendations.length} recommendations',
-                                                style: const TextStyle(
-                                                  color: Colors.white,
+                                                style: TextStyle(
+                                                  color: Colors.pink.shade800,
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w500,
                                                 ),
