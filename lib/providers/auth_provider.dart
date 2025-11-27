@@ -3,30 +3,30 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider with ChangeNotifier {
   bool _isAuthenticated = false;
-  String? _userEmail;
+  String? _username;
   bool _isLoading = false;
 
   bool get isAuthenticated => _isAuthenticated;
-  String? get userEmail => _userEmail;
+  String? get username => _username;
   bool get isLoading => _isLoading;
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(String username, String password) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      // For demo purposes, accept any email/password combination
+      // For demo purposes, accept any username/password combination
       // In a real app, this would make an API call
       await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
 
-      if (email.isNotEmpty && password.isNotEmpty) {
+      if (username == 'admin' && password == 'admin') {
         _isAuthenticated = true;
-        _userEmail = email;
+        _username = username;
 
         // Save to local storage
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isAuthenticated', true);
-        await prefs.setString('userEmail', email);
+        await prefs.setString('username', username);
 
         notifyListeners();
       } else {
@@ -44,12 +44,12 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> logout() async {
     _isAuthenticated = false;
-    _userEmail = null;
+    _username = null;
 
     // Clear from local storage
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('isAuthenticated');
-    await prefs.remove('userEmail');
+    await prefs.remove('username');
 
     notifyListeners();
   }
@@ -57,11 +57,11 @@ class AuthProvider with ChangeNotifier {
   Future<void> checkAuthStatus() async {
     final prefs = await SharedPreferences.getInstance();
     _isAuthenticated = prefs.getBool('isAuthenticated') ?? false;
-    _userEmail = prefs.getString('userEmail');
+    _username = prefs.getString('username');
     notifyListeners();
   }
 
-  Future<void> register(String email, String password, String name) async {
+  Future<void> register(String username, String password, String name) async {
     _isLoading = true;
     notifyListeners();
 
@@ -69,13 +69,13 @@ class AuthProvider with ChangeNotifier {
       // For demo purposes, simulate registration
       await Future.delayed(const Duration(seconds: 1));
 
-      if (email.isNotEmpty && password.isNotEmpty && name.isNotEmpty) {
+      if (username.isNotEmpty && password.isNotEmpty && name.isNotEmpty) {
         _isAuthenticated = true;
-        _userEmail = email;
+        _username = username;
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isAuthenticated', true);
-        await prefs.setString('userEmail', email);
+        await prefs.setString('username', username);
 
         notifyListeners();
       } else {

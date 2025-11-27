@@ -11,7 +11,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   bool _isLogin = true;
@@ -19,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     _nameController.dispose();
     super.dispose();
@@ -28,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _submit() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+    if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all required fields')),
       );
@@ -48,10 +48,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       if (_isLogin) {
-        await authProvider.login(_emailController.text, _passwordController.text);
+        await authProvider.login(_usernameController.text, _passwordController.text);
       } else {
         await authProvider.register(
-          _emailController.text,
+          _usernameController.text,
           _passwordController.text,
           _nameController.text,
         );
@@ -147,13 +147,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 16),
                       ],
 
-                      // Email field
+                      // Username field
                       TextField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
+                        controller: _usernameController,
                         decoration: InputDecoration(
-                          labelText: 'Email',
-                          prefixIcon: const Icon(Icons.email),
+                          labelText: 'Username',
+                          prefixIcon: const Icon(Icons.person),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
