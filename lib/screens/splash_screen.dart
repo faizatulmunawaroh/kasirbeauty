@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:provider/provider.dart';
 import '../widgets/bottom_navigation.dart';
+import '../providers/auth_provider.dart';
+import 'login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,79 +26,87 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // Logo animations
-    _logoController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    );
+    // Check auth status
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await authProvider.checkAuthStatus();
 
-    _logoScaleAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _logoController,
-      curve: Curves.elasticOut,
-    ));
+      // Logo animations
+      _logoController = AnimationController(
+        duration: const Duration(milliseconds: 1500),
+        vsync: this,
+      );
 
-    _logoOpacityAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _logoController,
-      curve: const Interval(0.0, 0.7, curve: Curves.easeIn),
-    ));
+      _logoScaleAnimation = Tween<double>(
+        begin: 0.0,
+        end: 1.0,
+      ).animate(CurvedAnimation(
+        parent: _logoController,
+        curve: Curves.elasticOut,
+      ));
 
-    // Text animations
-    _textController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
-      vsync: this,
-    );
+      _logoOpacityAnimation = Tween<double>(
+        begin: 0.0,
+        end: 1.0,
+      ).animate(CurvedAnimation(
+        parent: _logoController,
+        curve: const Interval(0.0, 0.7, curve: Curves.easeIn),
+      ));
 
-    _textSlideAnimation = Tween<double>(
-      begin: 50.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(
-      parent: _textController,
-      curve: Curves.easeOutCubic,
-    ));
+      // Text animations
+      _textController = AnimationController(
+        duration: const Duration(milliseconds: 1200),
+        vsync: this,
+      );
 
-    // Fade animation for transition
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
+      _textSlideAnimation = Tween<double>(
+        begin: 50.0,
+        end: 0.0,
+      ).animate(CurvedAnimation(
+        parent: _textController,
+        curve: Curves.easeOutCubic,
+      ));
 
-    _fadeAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+      // Fade animation for transition
+      _fadeController = AnimationController(
+        duration: const Duration(milliseconds: 800),
+        vsync: this,
+      );
 
-    // Start animations
-    _startAnimations();
+      _fadeAnimation = Tween<double>(
+        begin: 1.0,
+        end: 0.0,
+      ).animate(CurvedAnimation(
+        parent: _fadeController,
+        curve: Curves.easeInOut,
+      ));
 
-    // Navigate to dashboard after animations
-    Timer(const Duration(seconds: 4), () {
-      if (mounted) {
-        _fadeController.forward().then((_) {
-          Navigator.pushReplacement(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  const BottomNavigation(),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: child,
-                );
-              },
-              transitionDuration: const Duration(milliseconds: 800),
-            ),
-          );
-        });
-      }
+      // Start animations
+      _startAnimations();
+
+      // Navigate after animations
+      Timer(const Duration(seconds: 4), () {
+        if (mounted) {
+          _fadeController.forward().then((_) {
+            final nextScreen = authProvider.isAuthenticated
+                ? const BottomNavigation()
+                : const LoginScreen();
+            Navigator.pushReplacement(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) => nextScreen,
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  );
+                },
+                transitionDuration: const Duration(milliseconds: 800),
+              ),
+            );
+          });
+        }
+      });
     });
   }
 
