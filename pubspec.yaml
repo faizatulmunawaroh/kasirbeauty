@@ -17,6 +17,9 @@ dependencies:
   csv: ^5.1.1
   share_plus: ^7.2.2
   path_provider: ^2.1.3
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.16.0
+  cloud_firestore: ^4.14.0
 
 dev_dependencies:
   flutter_test:

@@ -111,7 +111,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
               );
               final productProvider = Provider.of<ProductProvider>(context, listen: false);
               await productProvider.addProduct(product);
-              Navigator.pop(context);
+              if (mounted) {
+                Navigator.pop(context);
+              }
             },
             child: const Text('Add'),
           ),
@@ -170,10 +172,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
               );
               final productProvider = Provider.of<ProductProvider>(context, listen: false);
               await productProvider.updateProduct(updatedProduct);
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Product updated successfully')),
-              );
+              if (mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Product updated successfully')),
+                );
+              }
             },
             child: const Text('Update'),
           ),
@@ -197,10 +201,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
             onPressed: () async {
               final productProvider = Provider.of<ProductProvider>(context, listen: false);
               await productProvider.deleteProduct(product.id);
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Product deleted successfully')),
-              );
+              if (mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Product deleted successfully')),
+                );
+              }
             },
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
@@ -489,17 +495,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     ),
                   ),
 
-                  // Press overlay effect
-                  AnimatedOpacity(
-                    opacity: isPressed ? 0.1 : 0.0,
-                    duration: const Duration(milliseconds: 200),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: _getCategoryColor(product.category),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
